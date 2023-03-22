@@ -1,8 +1,10 @@
 .DS_Store
 vendor
 
-terraform-provider-hashicups
+terraform-provider-kiwi
 bin
+
+.idea
 
 # Local .terraform directories
 **/.terraform/*
