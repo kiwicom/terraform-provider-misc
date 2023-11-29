@@ -1,28 +1,21 @@
 terraform {
   required_providers {
     kiwi = {
-      source  = "kiwicom/kiwi"
+      source = "kiwicom/misc"
     }
   }
 }
 
-resource "kiwi_claim_from_pool" "server_addresses" {
-  pool = [
-    "10.0.0.1",
-    "10.0.0.2",
-    "10.0.0.3",
-    "10.0.0.4",
-    "10.0.0.5",
-    "10.0.0.6",
-  ]
+resource "misc_claim_from_pool" "master_cidr_subnets" {
+  pool = [for i in range(900, 1024) : cidrsubnet("172.23.192.0/18", 10, i)]
   claimers = [
-    "server1",
-    "server2",
-    "server3",
-    "server4",
+    "cluster1",
+    "cluster2",
+    "cluster3",
+    "cluster4",
   ]
 }
 
-output "server_addresses" {
-  value = kiwi_claim_from_pool.output
+output "master_cidr_subnets" {
+  value = misc_claim_from_pool.master_cidr_subnets.output
 }

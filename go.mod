@@ -1,4 +1,4 @@
-module terraform-provider-kiwi
+module terraform-provider-misc
 
 go 1.18
 

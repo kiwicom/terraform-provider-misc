@@ -25,7 +25,7 @@ type kiwiProvider struct{}
 
 // Metadata returns the provider type name.
 func (p *kiwiProvider) Metadata(_ context.Context, _ provider.MetadataRequest, resp *provider.MetadataResponse) {
-	resp.TypeName = "kiwi"
+	resp.TypeName = "misc"
 }
 
 // Schema defines the provider-level schema for configuration data.
@@ -50,6 +50,6 @@ func (p *kiwiProvider) DataSources(_ context.Context) []func() datasource.DataSo
 // Resources defines the resources implemented in the provider.
 func (p *kiwiProvider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
-		NewOrderResource,
+		NewClaimFromPoolResource,
 	}
 }

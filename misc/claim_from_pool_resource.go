@@ -24,7 +24,7 @@ var (
 )
 
 // NewOrderResource is a helper function to simplify the provider implementation.
-func NewOrderResource() resource.Resource {
+func NewClaimFromPoolResource() resource.Resource {
 	return &claimFromPool{}
 }
 
