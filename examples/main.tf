@@ -1,6 +1,6 @@
 terraform {
   required_providers {
-    kiwi = {
+    misc = {
       source = "kiwicom/misc"
     }
   }

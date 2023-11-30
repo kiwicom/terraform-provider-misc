@@ -8,7 +8,7 @@ description: |-
 
 # misc Provider
 
-Various Terraform helpers.
+Terraform helpers.
 
 
 

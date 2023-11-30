@@ -11,7 +11,7 @@ import (
 //go:generate go run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs generate --provider-name misc
 
 func main() {
-	providerserver.Serve(context.Background(), kiwi.New, providerserver.ServeOpts{
+	providerserver.Serve(context.Background(), misc.New, providerserver.ServeOpts{
 		Address: "registry.terraform.io/kiwicom/kiwi",
 	})
 }

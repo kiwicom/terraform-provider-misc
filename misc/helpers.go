@@ -1,4 +1,4 @@
-package kiwi
+package misc
 
 func stringInSlice(a string, list []string) bool {
 	for _, b := range list {

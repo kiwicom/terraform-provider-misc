@@ -1,4 +1,4 @@
-package kiwi
+package misc
 
 import (
 	"context"
@@ -17,8 +17,8 @@ import (
 
 // Ensure the implementation satisfies the expected interfaces.
 var (
-	_ resource.Resource                = &claimFromPool{}
-	_ resource.ResourceWithConfigure   = &claimFromPool{}
+	_ resource.Resource = &claimFromPool{}
+	//_ resource.ResourceWithConfigure   = &claimFromPool{}
 	_ resource.ResourceWithImportState = &claimFromPool{}
 	_ resource.ResourceWithModifyPlan  = &claimFromPool{}
 )
@@ -31,12 +31,12 @@ func NewClaimFromPoolResource() resource.Resource {
 // claimFromPool is the resource implementation.
 type claimFromPool struct{}
 
-// claimgFromPoolModel maps the resource schema data.
-type claimgFromPoolModel struct {
-	ID       types.String       `tfsdk:"id"`
-	Pool     []string           `tfsdk:"pool"`
-	Claimers []string           `tfsdk:"claimers"`
-	Output   basetypes.MapValue `tfsdk:"output"`
+// claimFromPoolModel maps the resource schema data.
+type claimFromPoolModel struct {
+	ID       basetypes.StringValue `tfsdk:"id"`
+	Pool     basetypes.SetValue    `tfsdk:"pool"`
+	Claimers basetypes.SetValue    `tfsdk:"claimers"`
+	Output   basetypes.MapValue    `tfsdk:"output"`
 }
 
 // Metadata returns the data source type name.
@@ -76,28 +76,47 @@ func (r *claimFromPool) Schema(_ context.Context, _ resource.SchemaRequest, resp
 	}
 }
 
+type unknownModifier struct{}
+
+func (u unknownModifier) Description(ctx context.Context) string {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (u unknownModifier) MarkdownDescription(ctx context.Context) string {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (u unknownModifier) PlanModifySet(ctx context.Context, request planmodifier.SetRequest, response *planmodifier.SetResponse) {
+	//TODO implement me
+	panic("implement me")
+}
+
+var _ planmodifier.Set = unknownModifier{}
+
 func (r *claimFromPool) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
-	var plan claimgFromPoolModel
+	var plan claimFromPoolModel
 	resp.Diagnostics.Append(req.Config.Get(ctx, &plan)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	if len(plan.Claimers) > len(plan.Pool) {
+	if plan.Pool.IsUnknown() || plan.Claimers.IsUnknown() {
+		return
+	}
+
+	if len(plan.Claimers.Elements()) > len(plan.Pool.Elements()) {
 		resp.Diagnostics.AddError("Number of claimers shouldn't be higher than number of items in the pool",
 			"")
 		return
 	}
 }
 
-// Configure adds the provider configured client to the data source.
-func (r *claimFromPool) Configure(_ context.Context, req resource.ConfigureRequest, _ *resource.ConfigureResponse) {
-}
-
 // Create creates the resource and sets the initial Terraform state.
 func (r *claimFromPool) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	// Retrieve values from plan
-	var plan claimgFromPoolModel
+	var plan claimFromPoolModel
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -106,9 +125,16 @@ func (r *claimFromPool) Create(ctx context.Context, req resource.CreateRequest, 
 	plan.ID = types.StringValue(time.Now().Format(time.RFC3339Nano))
 
 	m := map[string]string{}
+	planPool := []string{}
+	planClaimers := []string{}
+	resp.Diagnostics.Append(plan.Pool.ElementsAs(ctx, &planPool, false)...)
+	resp.Diagnostics.Append(plan.Claimers.ElementsAs(ctx, &planClaimers, false)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
-	for i, c := range plan.Claimers {
-		m[c] = plan.Pool[i]
+	for i, c := range planClaimers {
+		m[c] = planPool[i]
 	}
 
 	mv, diags := basetypes.NewMapValueFrom(ctx, types.StringType, m)
@@ -132,14 +158,14 @@ func (r *claimFromPool) Read(ctx context.Context, req resource.ReadRequest, resp
 	return
 }
 
-func (r *claimFromPool) update(ctx context.Context, tfplan tfsdk.Plan, tfstate tfsdk.State, diag *diag.Diagnostics) (plan claimgFromPoolModel) {
+func (r *claimFromPool) update(ctx context.Context, tfplan tfsdk.Plan, tfstate tfsdk.State, diag *diag.Diagnostics) (plan claimFromPoolModel) {
 	diags := tfplan.Get(ctx, &plan)
 	diag.Append(diags...)
 	if diag.HasError() {
 		return
 	}
 
-	var state claimgFromPoolModel
+	var state claimFromPoolModel
 	tfstate.Get(ctx, &state)
 	diag.Append(diags...)
 	if diag.HasError() {
@@ -155,13 +181,21 @@ func (r *claimFromPool) update(ctx context.Context, tfplan tfsdk.Plan, tfstate t
 		}
 	}
 
-	freePool := make([]string, len(plan.Pool))
-	copy(freePool, plan.Pool)
-	notYetClaimers := make([]string, len(plan.Claimers))
-	copy(notYetClaimers, plan.Claimers)
+	planPool := []string{}
+	planClaimers := []string{}
+	diag.Append(plan.Pool.ElementsAs(ctx, &planPool, false)...)
+	diag.Append(plan.Claimers.ElementsAs(ctx, &planClaimers, false)...)
+	if diag.HasError() {
+		return
+	}
+
+	freePool := make([]string, len(planPool))
+	copy(freePool, planPool)
+	notYetClaimers := make([]string, len(planClaimers))
+	copy(notYetClaimers, planClaimers)
 
 	for c, p := range stateOutput {
-		if !stringInSlice(c, plan.Claimers) || !stringInSlice(p, plan.Pool) {
+		if !stringInSlice(c, planClaimers) || !stringInSlice(p, planPool) {
 			delete(stateOutput, c)
 		}
 	}

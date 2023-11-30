@@ -27,5 +27,3 @@ Manages pool claimers.
 ### Read-Only
 
 - `id` (String) Random id.
-
-
