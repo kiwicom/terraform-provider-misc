@@ -37,19 +37,19 @@ func (p *kiwiProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp 
 
 // Configure prepares  nothing
 func (p *kiwiProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
-	tflog.Info(ctx, "Configuring Kiwi provider")
+	tflog.Info(ctx, "Configuring Misc provider")
 }
 
 // DataSources defines the data sources implemented in the provider.
 func (p *kiwiProvider) DataSources(_ context.Context) []func() datasource.DataSource {
-	return []func() datasource.DataSource{
-		//NewCoffeesDataSource,
-	}
+	return []func() datasource.DataSource{}
 }
 
 // Resources defines the resources implemented in the provider.
 func (p *kiwiProvider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
+		NewCertPackSquashResource,
 		NewClaimFromPoolResource,
+		NewStatefulListResource,
 	}
 }

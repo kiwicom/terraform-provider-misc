@@ -17,8 +17,7 @@ import (
 
 // Ensure the implementation satisfies the expected interfaces.
 var (
-	_ resource.Resource = &claimFromPool{}
-	//_ resource.ResourceWithConfigure   = &claimFromPool{}
+	_ resource.Resource                = &claimFromPool{}
 	_ resource.ResourceWithImportState = &claimFromPool{}
 	_ resource.ResourceWithModifyPlan  = &claimFromPool{}
 )
@@ -76,25 +75,6 @@ func (r *claimFromPool) Schema(_ context.Context, _ resource.SchemaRequest, resp
 	}
 }
 
-type unknownModifier struct{}
-
-func (u unknownModifier) Description(ctx context.Context) string {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (u unknownModifier) MarkdownDescription(ctx context.Context) string {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (u unknownModifier) PlanModifySet(ctx context.Context, request planmodifier.SetRequest, response *planmodifier.SetResponse) {
-	//TODO implement me
-	panic("implement me")
-}
-
-var _ planmodifier.Set = unknownModifier{}
-
 func (r *claimFromPool) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
 	var plan claimFromPoolModel
 	resp.Diagnostics.Append(req.Config.Get(ctx, &plan)...)
@@ -123,27 +103,6 @@ func (r *claimFromPool) Create(ctx context.Context, req resource.CreateRequest, 
 		return
 	}
 	plan.ID = types.StringValue(time.Now().Format(time.RFC3339Nano))
-
-	m := map[string]string{}
-	planPool := []string{}
-	planClaimers := []string{}
-	resp.Diagnostics.Append(plan.Pool.ElementsAs(ctx, &planPool, false)...)
-	resp.Diagnostics.Append(plan.Claimers.ElementsAs(ctx, &planClaimers, false)...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	for i, c := range planClaimers {
-		m[c] = planPool[i]
-	}
-
-	mv, diags := basetypes.NewMapValueFrom(ctx, types.StringType, m)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	plan.Output = mv
 
 	// Set state to fully populated data
 	diags = resp.State.Set(ctx, plan)
