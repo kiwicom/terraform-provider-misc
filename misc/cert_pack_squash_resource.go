@@ -33,10 +33,10 @@ type certPackSquash struct{}
 
 // claimFromPoolModel maps the resource schema data.
 type certPackSquashModel struct {
-	ID        basetypes.StringValue `tfsdk:"id"`
-	Hosts     basetypes.SetValue    `tfsdk:"hosts"`
-	Sans      basetypes.SetValue    `tfsdk:"sans"`
-	UpdatedAt basetypes.StringValue `tfsdk:"updated_at"`
+	ID    basetypes.StringValue `tfsdk:"id"`
+	Hosts basetypes.SetValue    `tfsdk:"hosts"`
+	Sans  basetypes.SetValue    `tfsdk:"sans"`
+	//UpdatedAt basetypes.StringType  `tfsdk:"updated_at"`
 }
 
 // Metadata returns the data source type name.
@@ -66,10 +66,10 @@ func (r *certPackSquash) Schema(_ context.Context, _ resource.SchemaRequest, res
 				Description: "Map of claimed items from the pool (claimer => pool item)", //TODO
 				Computed:    true,
 			},
-			"updated_at": schema.StringAttribute{
-				Description: "Map of claimed items from the pool (claimer => pool item)", //TODO
-				Computed:    true,
-			},
+			//"updated_at": schema.StringAttribute{
+			//	Description: "Map of claimed items from the pool (claimer => pool item)", //TODO
+			//	Computed:    true,
+			//},
 		},
 	}
 }
@@ -103,7 +103,7 @@ func (r *certPackSquash) Create(ctx context.Context, req resource.CreateRequest,
 	}
 	plan.ID = types.StringValue(time.Now().Format(time.RFC3339Nano))
 
-	plan.UpdatedAt = types.StringValue(time.Now().Format(time.RFC3339))
+	//plan.UpdatedAt = types.StringValue(time.Now().Format(time.RFC3339))
 
 	// Set state to fully populated data
 	diags = resp.State.Set(ctx, plan)
@@ -181,7 +181,7 @@ func (r *certPackSquash) update(ctx context.Context, tfplan tfsdk.Plan, tfstate 
 		return
 	}
 
-	tfstate.GetAttribute(ctx, "created_at")
+	//tfstate.GetAttribute(ctx, "created_at")
 
 	sans := planHosts.CalculateSans()
 
