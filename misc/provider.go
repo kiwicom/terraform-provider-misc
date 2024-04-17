@@ -52,5 +52,6 @@ func (p *kiwiProvider) DataSources(_ context.Context) []func() datasource.DataSo
 func (p *kiwiProvider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		NewClaimFromPoolResource,
+		NewStatefulListResource,
 	}
 }
